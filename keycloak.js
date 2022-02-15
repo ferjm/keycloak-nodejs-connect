@@ -84,6 +84,8 @@ function Keycloak (config, keycloakConfig) {
   }
 
   this.config.idpHint = config.idpHint;
+
+  this.config.prompt = config.prompt;
 }
 
 /**
@@ -397,6 +399,11 @@ Keycloak.prototype.loginUrl = function (uuid, redirectUrl) {
   if (this.config && this.config.idpHint) {
     url += '&kc_idp_hint=' + encodeURIComponent(this.config.idpHint);
   }
+
+  if (this.config && this.config.prompt) {
+    url += '&prompt=' + encodeURIComponent(this.config.prompt);
+  }
+
   return url;
 };
 
