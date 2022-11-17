@@ -56,9 +56,25 @@ app.use(session({
 // Additional configuration is read from keycloak.json file
 // installed from the Keycloak web console.
 
+const config = {
+  realm: 'master',
+  'auth-server-url':
+      process.env.KEYCLOAK_AUTH_URL ||
+      'https://login.edgeimpulse.com/auth/',
+  'ssl-required': 'external',
+  resource: process.env.KEYCLOAK_CLIENT_ID || 'studio-staging',
+  'confidential-port': 0,
+  // @ts-ignore
+  credentials: {
+      secret:
+          process.env.KEYCLOAK_CLIENT_SECRET,
+  },
+};
+
 const keycloak = new Keycloak({
-  store: memoryStore
-})
+  store: memoryStore,
+  idpHint: process.env.KEYCLOAK_IDP_HINT || 'okta',
+}, config)
 
 // Install the Keycloak middleware.
 //
@@ -82,9 +98,7 @@ app.get('/login', keycloak.protect(), function (req, res) {
   })
 })
 
-app.get('/protected/resource', keycloak.enforcer(['resource:view', 'resource:write'], {
-  resource_server_id: 'nodejs-apiserver'
-}), function (req, res) {
+app.get('/protected/resource', keycloak.protect(), function (req, res) {
   res.render('index', {
     result: JSON.stringify(JSON.parse(req.session['keycloak-token']), null, 4),
     event: '1. Access granted to Default Resource\n'
